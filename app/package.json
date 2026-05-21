@@ -1,0 +1,8 @@
+{
+  "name": "sa3-local-ui",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

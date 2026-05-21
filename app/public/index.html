@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Stable Audio 3</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="compose">
+        <header class="topline">
+          <div>
+            <p class="kicker">Stable Audio 3 · MLX</p>
+            <h1 data-i18n="heroTitle">Своя студия генерации.</h1>
+            <p class="promptGuide" data-i18n="promptGuide">Пиши промпт на английском: жанр, настроение, инструменты, темп и что исключить.</p>
+          </div>
+          <div class="topControls">
+            <div class="langSwitch" aria-label="Language">
+              <button type="button" data-lang="ru" class="isActive">RU</button>
+              <button type="button" data-lang="en">EN</button>
+            </div>
+          </div>
+        </header>
+
+        <form id="generateForm">
+          <label class="promptBlock">
+            <span data-i18n="prompt">Промпт</span>
+            <textarea
+              id="prompt"
+              name="prompt"
+              rows="4"
+              spellcheck="false"
+              data-i18n-placeholder="promptPlaceholder"
+              placeholder="dark electronic music, deep bass, tight groove, no vocals, 118 BPM"
+            ></textarea>
+          </label>
+
+          <div class="actions">
+            <button class="generate" id="generateButton" type="submit">
+              <span data-i18n="generate">Сгенерировать</span>
+            </button>
+            <button class="ghost" id="surpriseButton" type="button" data-i18n="promptIdea">Идея</button>
+            <span class="runState" id="status" data-i18n="ready">Готово</span>
+          </div>
+        </form>
+      </section>
+
+      <section class="settings">
+        <div class="modelPicker" id="modelPicker">
+          <div class="settingsHead">
+            <b data-i18n="model">Модель</b>
+            <button class="ghost compact" id="refreshModels" type="button" data-i18n="refresh">Обновить</button>
+          </div>
+          <button class="modelTrigger" id="modelTrigger" type="button" aria-expanded="false">
+            <span>
+              <strong id="modelTitle">Medium</strong>
+              <small id="modelHint">Лучшее локальное качество для законченных музыкальных идей.</small>
+            </span>
+            <b id="modelState">Готово</b>
+          </button>
+          <div class="modelMenu" id="modelMenu"></div>
+          <input id="model" type="hidden" value="medium" />
+        </div>
+
+        <div class="grid">
+          <label class="setting">
+            <span data-i18n="seconds">Секунды</span>
+            <input id="seconds" type="number" min="1" max="380" step="1" value="30" />
+            <em data-i18n="secondsHint">15-45 с для набросков</em>
+          </label>
+          <label class="setting">
+            <span data-i18n="steps">Шаги</span>
+            <input id="steps" type="number" min="1" max="24" step="1" value="8" />
+            <em data-i18n="stepsHint">8 — хороший баланс</em>
+          </label>
+          <label class="setting">
+            <span>CFG</span>
+            <input id="cfg" type="number" min="-2" max="12" step="0.1" value="1" />
+            <em data-i18n="cfgHint">1 естественно, 2-4 точнее</em>
+          </label>
+          <label class="setting">
+            <span>Seed</span>
+            <input id="seed" type="number" placeholder="Random" />
+            <em data-i18n="seedHint">повторяет результат</em>
+          </label>
+        </div>
+
+        <button class="settingsReset" id="resetDefaults" type="button" data-i18n="resetDefaults">Сбросить настройки</button>
+
+        <details class="advanced">
+          <summary data-i18n="moreControls">Дополнительные настройки</summary>
+          <div class="advancedBody">
+            <div class="grid extra">
+              <label class="setting">
+                <span>APG</span>
+                <input id="apg" type="number" min="0" max="1" step="0.05" value="1" />
+                <em data-i18n="apgHint">оставь 1</em>
+              </label>
+              <label class="setting">
+                <span data-i18n="noise">Шум</span>
+                <input id="initNoiseLevel" type="number" min="0.01" max="2" step="0.05" value="1" />
+                <em data-i18n="noiseHint">1 для text-to-audio</em>
+              </label>
+              <label class="setting">
+                <span>DType</span>
+                <select id="dtype">
+                  <option value="fp16" selected>fp16</option>
+                  <option value="fp32">fp32</option>
+                </select>
+                <em data-i18n="dtypeHint">fp16 быстрее</em>
+              </label>
+              <div class="setting toggleSetting">
+                <label class="toggle">
+                  <input id="keepModels" type="checkbox" />
+                  <span data-i18n="keepModels">Держать в памяти</span>
+                </label>
+                <em data-i18n="keepModelsHint">не выгружать модели после генерации</em>
+              </div>
+            </div>
+            <label class="negative">
+              <span data-i18n="negativePrompt">Негативный промпт</span>
+              <input id="negativePrompt" type="text" data-i18n-placeholder="negativePlaceholder" placeholder="drums, vocals, distortion" />
+              <em data-i18n="negativeHint">Работает, когда CFG не равен 1</em>
+            </label>
+          </div>
+        </details>
+      </section>
+
+      <section class="playerPanel" id="playerPanel">
+        <div class="loading" id="loading">
+          <div class="pulse">
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          </div>
+          <p id="loadingText">Готовлю модель</p>
+        </div>
+
+        <div class="result" id="result">
+          <div>
+            <p class="kicker" data-i18n="latestRender">Последний рендер</p>
+            <h2 id="trackTitle" data-i18n="noAudio">Пока нет аудио</h2>
+          </div>
+          <div class="audioWrap">
+            <audio id="audio" controls></audio>
+          </div>
+          <div class="resultActions">
+            <a id="download" class="download" href="#" download data-i18n="downloadWav">Скачать WAV</a>
+            <button class="ghost compact" id="exportMp4" type="button" data-i18n="exportMp4">Экспорт MP4</button>
+            <button class="ghost compact" id="copySettings" type="button" data-i18n="copySettings">Копировать настройки</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="historyPanel">
+        <div class="panelHead">
+          <p class="kicker" data-i18n="recent">Недавние</p>
+          <button class="ghost compact" id="refreshHistory" type="button" data-i18n="refresh">Обновить</button>
+        </div>
+        <div class="history" id="history"></div>
+      </section>
+    </main>
+
+    <div class="modal" id="authModal" aria-hidden="true">
+      <div class="modalCard">
+        <h2 data-i18n="authTitle">Hugging Face не авторизован</h2>
+        <p data-i18n="authText">Загрузка может быть медленной или ограниченной. Авторизуйтесь один раз в терминале, либо продолжите без входа.</p>
+        <code id="authCommand">hf auth login</code>
+        <div class="modalActions">
+          <button class="download" id="copyAuthCommand" type="button" data-i18n="copyCommand">Скопировать команду</button>
+          <button class="ghost" id="continueDownload" type="button" data-i18n="downloadAnyway">Скачать всё равно</button>
+          <button class="ghost" id="closeAuthModal" type="button" data-i18n="close">Закрыть</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
