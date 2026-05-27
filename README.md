@@ -1,5 +1,4 @@
 # Stable Audio 3 Local UI for macOS 
----
 ## RU
 Минимальный локальный интерфейс для Stable Audio 3 на Apple Silicon. Он запускается в браузере и использует официальный MLX runtime от Stability AI.
 
